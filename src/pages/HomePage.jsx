@@ -25,12 +25,8 @@ const HomePage = ({connect, disconnect, isActive, account}) => {
   useEffect(()=>{
     const baseURL = "http://127.0.0.1:8000/";
     const getCredIDS = async () => {
-      // const U = await axios.get(baseURL+"getFilesByUser?userId="+user.id);
       const res = await axios.get(baseURL+'getFilesByUser?userId='+user.id)
-      // console.log('check files',U.data)
-      // const credIDs = U.data.user.credentialIds;
       var num = 1
-      console.log('res data', res.data.credentials)
       res.data.credentials.forEach( async (i)=>{
         var doc = ''
         var link = ''
@@ -66,28 +62,29 @@ const HomePage = ({connect, disconnect, isActive, account}) => {
   
         const pks = localStorage.getItem('privateKey' + user.username) ? localStorage.getItem('privateKey' + user.username) : "";
         const privateKey = (pks === "") ? {} : JSON.parse(pks);
-        console.log('items', i)
+    
         i.viewers.forEach(async (it) => {
           if (it.id === user.id) {  
-            // const ah = await decrypt(it.data.assetHash, privateKey);
-            // const dmrl = await decrypt(it.data.metadataUrl, privateKey);
-            const ah = it.data.assetHash
-            const dmrl = it.data.metadataUrl
+            console.log(privateKey) 
+            const assetHash = await decrypt(it.data.assetHash, privateKey);
+            const link = await decrypt(it.data.metadataUrl, privateKey);
+            console.log(link, assetHash)
+            
             setDataRows((oldData)=>[...oldData, {
               id:num, 
               owner: resp.data.user.username,
               doc:it.data.fileName, 
-              date: i.createdAt,
-              link: dmrl,
-              assetHash: ah, 
-              valid:i.isValid,
+              date: i.createdAt.toString(),
+              link,
+              assetHash, 
+              valid:i.isValid.toString(),
               transfer: t,
               revoke: r,
               share: s, 
             }] )
+            num = num + 1
           }
         })
-        num = num + 1
       })
       console.log('dataRows',dataRows)
       // ShowCreds(dataRows)

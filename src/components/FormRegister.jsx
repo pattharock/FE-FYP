@@ -48,7 +48,8 @@ const FormRegister = () => {
       const payload = {
         username: formValues.username,
         walletAddress: formValues.walletAddress,
-        publicKey: JSON.stringify(publicKey)
+        publicKey: JSON.stringify(publicKey),
+        isAdmin:false
       };
       setLoading(true);
       axios.post(baseURL+"/register", payload).then(response => {
@@ -59,6 +60,7 @@ const FormRegister = () => {
           setError(true);
         }
       }, error => {
+        console.log(error)
         setLoading(false);
         setError(true);
       });
