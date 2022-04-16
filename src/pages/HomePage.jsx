@@ -6,32 +6,101 @@ import Alert from "@mui/material/Alert";
 import Hero from "../components/Hero";
 import axios from "axios";
 import ShowCreds from "../components/ShowCreds";
+import {encrypt, decrypt} from "../components/rsa/utils"
 
 
 const HomePage = ({connect, disconnect, isActive, account}) => {
 
+  const [dataRows, setDataRows] = useState([])
+ 
   const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
   if (user) {
     console.log("INSIDE HOME");
     console.log(user);
   }
+  console.log('user',user)
 
   let myCreds = [1];
   let sharedWithMe = [];
   useEffect(()=>{
     const baseURL = "http://127.0.0.1:8000/";
     const getCredIDS = async () => {
-      const U = await axios.get(baseURL+"getUserById?userId="+user.id);
-      const credIDs = U.data.user.credentialIds;
-      credIDs.forEach(async (credID) => {
-        const C = await axios.get(baseURL+"getCredential?credentailId="+credID);
-        const cred = C.data.credential;
-        if (cred.ownerId === user.id) {
-          myCreds.push(cred);
-        } else {
-          sharedWithMe.push(cred);
-        }
+      // const U = await axios.get(baseURL+"getFilesByUser?userId="+user.id);
+      const res = await axios.get(baseURL+'getFilesByUser?userId='+user.id)
+      // console.log('check files',U.data)
+      // const credIDs = U.data.user.credentialIds;
+      var num = 1
+      console.log('res data', res.data.credentials)
+      res.data.credentials.forEach( async (i)=>{
+        var doc = ''
+        var link = ''
+        var assetHash = ''
+        var t = ''
+        var s = ''
+        var r = ''
+        i.viewers.forEach((item)=>{
+          if(item.id === user.id){
+            if(item.permissions.transfer){
+              t = 'Allowed'
+            }else{
+              t = 'Disallowed'
+            }
+            if(item.permissions.share){
+              s = 'Allowed'
+            }else{
+              s = 'Disallowed'
+            }
+            if(item.permissions.revoke){
+              r = 'Allowed'
+            }else{
+              r = 'Disallowed'
+            }
+      
+          }
+          doc = item.data.fileName
+          link = item.data.metadataUrl
+          assetHash = item.data.assetHash
+        });
+  
+        const resp = await axios.get(baseURL+'getUserById?userId='+i.currentOwner);
+  
+        const pks = localStorage.getItem('privateKey' + user.username) ? localStorage.getItem('privateKey' + user.username) : "";
+        const privateKey = (pks === "") ? {} : JSON.parse(pks);
+        console.log('items', i)
+        i.viewers.forEach(async (it) => {
+          if (it.id === user.id) {  
+            // const ah = await decrypt(it.data.assetHash, privateKey);
+            // const dmrl = await decrypt(it.data.metadataUrl, privateKey);
+            const ah = it.data.assetHash
+            const dmrl = it.data.metadataUrl
+            setDataRows((oldData)=>[...oldData, {
+              id:num, 
+              owner: resp.data.user.username,
+              doc:it.data.fileName, 
+              date: i.createdAt,
+              link: dmrl,
+              assetHash: ah, 
+              valid:i.isValid,
+              transfer: t,
+              revoke: r,
+              share: s, 
+            }] )
+          }
+        })
+        num = num + 1
       })
+      console.log('dataRows',dataRows)
+      // ShowCreds(dataRows)
+      // credIDs.forEach(async (credID) => {
+      //   const C = await axios.get(baseURL+"getCredential?credentailId="+credID);
+      //   console.log(C)
+      //   const cred = C;
+      //   if (cred.id === user.id) {
+      //     myCreds.push(cred);
+      //   } else {
+      //     sharedWithMe.push(cred);
+      //   }
+      // })
     }
     getCredIDS();
   
@@ -53,7 +122,7 @@ const HomePage = ({connect, disconnect, isActive, account}) => {
                 <Typography variant="h2" component="h1" gutterBottom sx={{ color: "#00897b", fontWeight: "bold"}}>
                   My Credentials
                 </Typography>
-                <ShowCreds credentials={myCreds} />
+                <ShowCreds credentials={dataRows} />
               </>
           )}
             {
