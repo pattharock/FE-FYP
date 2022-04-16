@@ -17,16 +17,24 @@ const HomePage = ({connect, disconnect, isActive, account}) => {
   }
 
   let myCreds = [1];
-  let sharedWithMe = [1, 2];
-
+  let sharedWithMe = [];
   useEffect(()=>{
-    const baseURL = "http://127.0.0.1:8000"
-    axios.get(baseURL+"/login").then(response => {
-      if (response.data.success) {
-      } else{
-      }
-    }, error => {
-    });
+    const baseURL = "http://127.0.0.1:8000/";
+    const getCredIDS = async () => {
+      const U = await axios.get(baseURL+"getUserById?userId="+user.id);
+      const credIDs = U.data.user.credentialIds;
+      credIDs.forEach(async (credID) => {
+        const C = await axios.get(baseURL+"getCredential?credentailId="+credID);
+        const cred = C.data.credential;
+        if (cred.ownerId === user.id) {
+          myCreds.push(cred);
+        } else {
+          sharedWithMe.push(cred);
+        }
+      })
+    }
+    getCredIDS();
+  
   }, [])
 
   return (

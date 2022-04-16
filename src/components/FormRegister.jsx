@@ -6,6 +6,8 @@ import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
 import AlertDialog from "./AlertDialog";
 import axios from "axios";
+import rsa from 'js-crypto-rsa';
+import {encrypt, decrypt} from "./rsa/utils";
 
 const defaultValues = {
   username: "",
@@ -28,22 +30,38 @@ const FormRegister = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const baseURL = "http://127.0.0.1:8000"
-    const payload = {
-      username: formValues.username,
-      walletAddress: formValues.walletAddress,
-    };
-    setLoading(true);
-    axios.post(baseURL+"/register", payload).then(response => {
-      setLoading(false);
-      if (response.data.success) {
-        setSubmitted(true);
-      } else{
+
+    rsa.generateKey(2048).then( async (key) => {
+      const publicKey = key.publicKey;
+      const privateKey = key.privateKey;
+
+      console.log("TESSTING ENCRYPTION");
+      const message = "Hello World!";
+      const encrypted = await encrypt(message, publicKey);
+      const decrypted = await decrypt(encrypted, privateKey);
+      console.log(message, decrypted, message == decrypted);
+
+      
+      localStorage.setItem(`publicKey${formValues.username}`, JSON.stringify(publicKey));
+      localStorage.setItem(`privateKey${formValues.username}`, JSON.stringify(privateKey));
+      const baseURL = "http://127.0.0.1:8000"
+      const payload = {
+        username: formValues.username,
+        walletAddress: formValues.walletAddress,
+        publicKey: JSON.stringify(publicKey)
+      };
+      setLoading(true);
+      axios.post(baseURL+"/register", payload).then(response => {
+        setLoading(false);
+        if (response.data.success) {
+          setSubmitted(true);
+        } else{
+          setError(true);
+        }
+      }, error => {
+        setLoading(false);
         setError(true);
-      }
-    }, error => {
-      setLoading(false);
-      setError(true);
+      });
     });
   };
 
