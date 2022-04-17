@@ -21,9 +21,9 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/react-router-dom": "^5.3.2",
+    "@usedapp/core": "^0.7.3",
     "@web3-react/core": "^6.1.9",
     "@web3-react/injected-connector": "^6.0.7",
-    "@usedapp/core": "^0.7.3",
     "apollo-link-rest": "^0.8.0-beta.0",
     "base64-arraybuffer": "^1.0.2",
     "crypto": "^1.0.1",
@@ -35,6 +35,7 @@
     "js-crypto-rsa": "^1.0.4",
     "moment": "^2.29.2",
     "momentjs": "^2.0.0",
+    "prop-types": "^15.8.1",
     "qs": "^6.10.1",
     "react": "^17.0.2",
     "react-cookie": "^4.1.1",
@@ -82,6 +83,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.27.1",
     "prettier": "^2.5.0",
+    "react-error-overlay": "^6.0.9",
     "redux-devtools-extension": "^2.13.9"
   }
 }

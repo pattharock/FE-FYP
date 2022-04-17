@@ -58,7 +58,7 @@ function App() {
       <Router>
         <Container sx={{display: "flex", maxHeight: "100% !important", flexDirection: "column", minWidth: "100%", padding: "0 0 0 0 !important"}}>
           <Header/>
-          <Container sx={{display: "flex", height: "80vh", minWidth: "70%", flexDirection: "column"}}>
+          <Container sx={{display: "flex", height: "80vh", minWidth: "85%", flexDirection: "column"}}>
             <Routes>
               <Route path="/" element={<HomePage connect={connect} disconnect={disconnect} isActive={isActive} account={account}/>} />
               <Route path="/register" theme={theme} element={<RegisterPage connect={connect} disconnect={disconnect} isActive={isActive} account={account} />} />

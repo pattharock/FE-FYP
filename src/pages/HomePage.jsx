@@ -12,6 +12,7 @@ import {encrypt, decrypt} from "../components/rsa/utils"
 const HomePage = ({connect, disconnect, isActive, account}) => {
 
   const [dataRows, setDataRows] = useState([])
+  const [forChild, setForChild] = useState([])
  
   const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
   if (user) {
@@ -20,8 +21,7 @@ const HomePage = ({connect, disconnect, isActive, account}) => {
   }
   console.log('user',user)
 
-  let myCreds = [1];
-  let sharedWithMe = [];
+  let myCreds = [];
   useEffect(()=>{
     const baseURL = "http://127.0.0.1:8000/";
     const getCredIDS = async () => {
@@ -72,7 +72,7 @@ const HomePage = ({connect, disconnect, isActive, account}) => {
             
             setDataRows((oldData)=>[...oldData, {
               id:num, 
-              owner: resp.data.user.username,
+              owner: resp.data.user.username + ":" + i.currentOwner,
               doc:it.data.fileName, 
               date: i.createdAt.toString(),
               link,
@@ -87,17 +87,6 @@ const HomePage = ({connect, disconnect, isActive, account}) => {
         })
       })
       console.log('dataRows',dataRows)
-      // ShowCreds(dataRows)
-      // credIDs.forEach(async (credID) => {
-      //   const C = await axios.get(baseURL+"getCredential?credentailId="+credID);
-      //   console.log(C)
-      //   const cred = C;
-      //   if (cred.id === user.id) {
-      //     myCreds.push(cred);
-      //   } else {
-      //     sharedWithMe.push(cred);
-      //   }
-      // })
     }
     getCredIDS();
   
@@ -110,39 +99,27 @@ const HomePage = ({connect, disconnect, isActive, account}) => {
           <Hero />
         </div>
       )}
-      {
-        user && (
-        <Container align="center">
-          <Box sx={{ my: 4 }}>
-            {(myCreds.length !== 0) && (
-              <>
-                <Typography variant="h2" component="h1" gutterBottom sx={{ color: "#00897b", fontWeight: "bold"}}>
+      <Container align="center">
+        <Box sx={{ my: 4}}>
+        {
+          user && dataRows.length === 0 && (
+            <Alert severity="error" sx={{width: "45%"}}>
+              No Credentials to show. 
+            </Alert>
+          )
+        }
+        {
+          user && dataRows.length > 0 && (
+            <>
+              <Typography variant="h2" component="h1" gutterBottom sx={{ color: "#00897b", fontWeight: "bold"}}>
                   My Credentials
-                </Typography>
-                <ShowCreds credentials={dataRows} />
-              </>
-          )}
-            {
-              (sharedWithMe.length !== 0) && (
-                <>
-                  <Typography variant="h2" component="h1" gutterBottom sx={{ color: "#00897b", fontWeight: "bold"}}>
-                    Shared with me
-                  </Typography>
-                  <ShowCreds credentials={sharedWithMe} />
-                </>
-              )
-            }
-            {
-              (sharedWithMe.length === 0 && myCreds.length === 0) && (
-                <Alert severity="error" sx={{width: "45%"}}>
-                  No Credentials to show. 
-                </Alert>
-              )
-            }
-          </Box>
-        </Container>
-        )
-      }
+              </Typography>
+              <ShowCreds credentials={dataRows} />
+            </>
+          )
+        }
+        </Box>
+      </Container>
     </>
   );
 }
